@@ -1,7 +1,7 @@
+import redis
+from redis.exceptions import ResponseError
 import json
 import os
-
-import redis
 
 class Database:
     def __init__(self):
@@ -11,14 +11,15 @@ class Database:
             password=os.getenv("REDIS_PASSWORD"),
             decode_responses=True
         )
-        if not self.r.exists("conversations"):
-            self.r.set("conversations", json.dumps({}))
 
-    def get(self, key):
-        return json.loads(self.r.get(key))
+    def reset(self):
+        self.r.flushdb()
 
-    def set(self, key, value):
-        return self.r.set(key, json.dumps(value))
+    def get(self, name):
+        item = self.r.get(name)
+        if item:
+            return json.loads(item)
+        return item
 
-# r.set("test", "hello")
-# print(r.get("test"))
+    def set(self, name, value):
+        self.r.set(name, json.dumps(value))
